@@ -38,14 +38,36 @@ module Enumerable
 	end
 
 	def my_count
-		total = 0
-		self.my_each {|val| total += 1 unless val.nil?}
-		total
+		# total = 0
+		# self.my_each {|val| total += 1}
+		# total
+		self.length
 	end
 
-	def my_map
+	# # block version
+	# def my_map
+	# 	collection = []
+	# 	self.my_each {|val| collection << yield(val)}
+	# 	collection
+	# end
+
+	# proc version
+	# def my_map(proc)
+	# 	collection = []
+	# 	self.my_each {|val| collection << proc.call(val)}
+	# 	collection
+	# end
+
+	# proc and block version
+	def my_map(proc=nil)
 		collection = []
-		self.my_each {|val| collection << yield(val)}
+		if block_given? && proc
+			self.my_each {|val| collection << proc.call(yield(val))}
+		elsif proc
+			self.my_each {|val| collection << proc.call(val)}
+		else
+			self.my_each {|val| collection << yield(val)}
+		end
 		collection
 	end
 
@@ -61,6 +83,11 @@ module Enumerable
 		total
 	end
 
+end
+
+
+def multiply_els(numbers)
+	numbers.my_inject {|total, val| total * val}
 end
 
 arr = [1, 2, 3]
@@ -118,12 +145,25 @@ arr = [1, 2, 3]
 # my_count
 # p arr.count
 # p arr.my_count
+# p [1, nil, 2].count
+# p [1, nil, 2].my_count
 # => 3
 
-# my_map
+# my_map (block)
 # p arr.map {|val| val * 2}
 # p arr.my_map {|val| val * 2}
 # => [2, 4, 6]
+
+# my_map (proc)
+# map_proc = Proc.new {|val| val * 2}
+# p arr.map(&map_proc)
+# p arr.my_map(&map_proc)
+# => [2, 4, 6]
+
+# my_map (proc and block)
+# map_proc = Proc.new {|val| val * 2}
+# p arr.my_map(map_proc) {|val| val * 2}
+# => [4, 8, 12]
 
 # my_inject
 # p arr.inject {|total, val| total + val}
@@ -135,3 +175,7 @@ arr = [1, 2, 3]
 # p arr.inject(2) {|total, val| total ** val}
 # p arr.my_inject(2) {|total, val| total ** val}
 # => 64
+
+# multiply_els
+# p multiply_els([2,4,5])
+# => 40
